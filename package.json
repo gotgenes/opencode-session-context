@@ -1,6 +1,6 @@
 {
   "name": "@gotgenes/opencode-session-context",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "OpenCode plugin for cross-session context access in subagent workflows",
   "author": {
     "name": "Chris Lasher"
