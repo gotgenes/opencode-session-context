@@ -1,0 +1,17 @@
+# Changelog
+
+## 1.0.0 (2026-03-27)
+
+
+### Features
+
+* format parent session messages with agent attribution and tool summaries ([2e0c73d](https://github.com/gotgenes/opencode-session-context/commit/2e0c73de96b5e747f9066df576e0352f9d3a7a85))
+* handle empty parent session ([f116d40](https://github.com/gotgenes/opencode-session-context/commit/f116d4056e61b3eacf4b873732a0a3eaf02b4f42))
+* register tool and handle no-parent error ([7b8de4d](https://github.com/gotgenes/opencode-session-context/commit/7b8de4dd4e66b36eee9eb1c07cf9393ee59bf3f0))
+
+
+### Miscellaneous Chores
+
+* add AGENTS.md with project context for agents ([05348b4](https://github.com/gotgenes/opencode-session-context/commit/05348b478c343d72935110dff6fe3b5e33e6b658))
+* install dependencies and fix biome schema version ([9a50dba](https://github.com/gotgenes/opencode-session-context/commit/9a50dbad5872804ddf63a7d51ed2899c6ef2711f))
+* scaffold project from opencode-agent-identity ([a58497f](https://github.com/gotgenes/opencode-session-context/commit/a58497fefce0be040e5d650f60dc1269d6f22d6b))
