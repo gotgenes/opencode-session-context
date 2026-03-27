@@ -1,5 +1,40 @@
 import type { Plugin } from "@opencode-ai/plugin";
 import { tool } from "@opencode-ai/plugin";
+import type { Part } from "@opencode-ai/sdk";
+import type { MessageWithAgent, MessageWithParts } from "./types";
+
+function formatTool(part: Part & { type: "tool" }): string {
+  const state = part.state as Record<string, unknown>;
+  const status = state.status as string;
+  const title = (state.title as string | undefined) ?? part.tool;
+  if (status === "error") {
+    return `  [tool] ${title} → error: ${state.error}`;
+  }
+  return `  [tool] ${title} → ${status}`;
+}
+
+function formatParts(parts: Part[]): string {
+  const lines: string[] = [];
+  for (const part of parts) {
+    if (part.type === "text") {
+      lines.push(part.text);
+    } else if (part.type === "tool") {
+      lines.push(formatTool(part as Part & { type: "tool" }));
+    }
+  }
+  return lines.join("\n");
+}
+
+function formatMessage(msg: MessageWithParts, index: number): string {
+  const num = index + 1;
+  const info = msg.info as Partial<MessageWithAgent> & { role: string };
+  if (info.role === "assistant") {
+    const agent = info.agent ?? "unknown";
+    const header = `${num}. assistant (${agent}) [${info.providerID}/${info.modelID}]`;
+    return `${header}\n${formatParts(msg.parts)}`;
+  }
+  return `${num}. ${info.role}\n${formatParts(msg.parts)}`;
+}
 
 export const ParentSessionPlugin: Plugin = async ({ client }) => {
   return {
@@ -25,12 +60,12 @@ export const ParentSessionPlugin: Plugin = async ({ client }) => {
           const response = await client.session.messages({
             path: { id: parent },
           });
-          const messages = response.data ?? [];
+          const messages = (response.data ?? []) as MessageWithParts[];
           if (messages.length === 0) {
             return "The parent session has no messages.";
           }
 
-          return "";
+          return messages.map(formatMessage).join("\n\n---\n\n");
         },
       }),
     },

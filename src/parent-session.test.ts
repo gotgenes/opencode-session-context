@@ -2,9 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { ParentSessionPlugin } from "./parent-session";
 
 function makeClient(
-  overrides: {
-    session?: { get?: any; messages?: any };
-  } = {},
+  overrides: { session?: { get?: any; messages?: any } } = {},
 ) {
   return {
     session: {
