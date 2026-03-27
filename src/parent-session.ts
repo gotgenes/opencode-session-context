@@ -15,10 +15,21 @@ export const ParentSessionPlugin: Plugin = async ({ client }) => {
           const session = await client.session.get({
             path: { id: context.sessionID },
           });
-          const parent = (session.data as Record<string, unknown>)?.parentID;
+          const parent = (session.data as Record<string, unknown>)?.parentID as
+            | string
+            | undefined;
           if (!parent) {
             return "Error: This session has no parent. This tool only works from subagent sessions.";
           }
+
+          const response = await client.session.messages({
+            path: { id: parent },
+          });
+          const messages = response.data ?? [];
+          if (messages.length === 0) {
+            return "The parent session has no messages.";
+          }
+
           return "";
         },
       }),
