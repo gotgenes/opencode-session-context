@@ -165,4 +165,45 @@ describe("parent_session_messages", () => {
     // Full tool output is NOT included
     expect(result).not.toContain("file contents...");
   });
+
+  test("includes model variant in assistant message header when present", async () => {
+    const client = makeClient({
+      session: {
+        get: () =>
+          Promise.resolve({
+            data: { id: "child-session-1", parentID: "parent-session-1" },
+          }),
+        messages: () =>
+          Promise.resolve({
+            data: [
+              {
+                info: {
+                  role: "assistant",
+                  agent: "build",
+                  providerID: "anthropic",
+                  modelID: "claude-opus-4",
+                  variant: "high",
+                },
+                parts: [
+                  {
+                    type: "text",
+                    text: "On it.",
+                  },
+                ],
+              },
+            ],
+          }),
+      },
+    });
+
+    const hooks = await ParentSessionPlugin({ client } as any);
+    const result = await hooks.tool!.parent_session_messages.execute(
+      {},
+      makeContext() as any,
+    );
+
+    expect(result).toContain(
+      "1. assistant (build) [anthropic/claude-opus-4 (high)]",
+    );
+  });
 });

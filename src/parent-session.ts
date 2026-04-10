@@ -1,7 +1,7 @@
 import type { Plugin } from "@opencode-ai/plugin";
 import { tool } from "@opencode-ai/plugin";
 import type { Part } from "@opencode-ai/sdk";
-import type { MessageWithAgent, MessageWithParts } from "./types";
+import type { AssistantMessageInfo, MessageWithParts } from "./types";
 
 function formatTool(part: Part & { type: "tool" }): string {
   const state = part.state as Record<string, unknown>;
@@ -25,15 +25,20 @@ function formatParts(parts: Part[]): string {
   return lines.join("\n");
 }
 
+function formatModel(info: AssistantMessageInfo): string {
+  const base = `${info.providerID}/${info.modelID}`;
+  return info.variant ? `${base} (${info.variant})` : base;
+}
+
 function formatMessage(msg: MessageWithParts, index: number): string {
   const num = index + 1;
-  const info = msg.info as Partial<MessageWithAgent> & { role: string };
-  if (info.role === "assistant") {
+  if (msg.info.role === "assistant") {
+    const info = msg.info as AssistantMessageInfo;
     const agent = info.agent ?? "unknown";
-    const header = `${num}. assistant (${agent}) [${info.providerID}/${info.modelID}]`;
+    const header = `${num}. assistant (${agent}) [${formatModel(info)}]`;
     return `${header}\n${formatParts(msg.parts)}`;
   }
-  return `${num}. ${info.role}\n${formatParts(msg.parts)}`;
+  return `${num}. ${msg.info.role}\n${formatParts(msg.parts)}`;
 }
 
 export const ParentSessionPlugin: Plugin = async ({ client }) => {

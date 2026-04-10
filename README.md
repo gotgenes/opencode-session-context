@@ -41,7 +41,7 @@ How do I fix the login bug?
 
 ---
 
-2. assistant (tdd) [anthropic/claude-opus-4-6]
+2. assistant (tdd) [anthropic/claude-opus-4 (high)]
 Let me check the existing test helpers.
 
   [tool] Read file: web/app/auth/routes/sign-in.test.ts → completed
