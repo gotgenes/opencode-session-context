@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/gotgenes/opencode-session-context/compare/v1.0.0...v1.1.0) (2026-04-11)
+
+
+### Features
+
+* include model variant in assistant message output ([2bc6820](https://github.com/gotgenes/opencode-session-context/commit/2bc6820d87b836e6be53e2d3fa51d30ddb39d8c4))
+
+
+### Documentation
+
+* update types.ts description to reflect variant augmentation ([9585817](https://github.com/gotgenes/opencode-session-context/commit/95858175387c51693e8e7f3cb429e27649e9ef0a))
+
 ## 1.0.0 (2026-03-27)
 
 
