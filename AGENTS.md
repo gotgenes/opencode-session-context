@@ -34,7 +34,7 @@ All source lives in `src/`. The codebase is small — a single feature module:
 
 - `index.ts` — Public API re-export
 - `parent-session.ts` — Plugin implementation: registers `parent_session_messages` tool, fetches and formats parent session messages
-- `types.ts` — Type augmentations for SDK v1 gaps (agent field missing from Message type, tracked at [opencode#15916](https://github.com/anomalyco/opencode/issues/15916))
+- `types.ts` — Type augmentations for SDK v1 gaps (`agent` on AssistantMessage, `variant` on both message types, tracked at [opencode#15916](https://github.com/anomalyco/opencode/issues/15916))
 - `parent-session.test.ts` — Unit tests using manual mocks of the SDK client
 
 ## Key Dependencies
