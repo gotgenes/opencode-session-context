@@ -40,7 +40,9 @@ describe("parent_session_messages", () => {
       makeContext() as any,
     );
 
-    expect(result).toContain("no parent");
+    expect(result).toEqual(
+      "Error: This session has no parent. This tool only works from subagent sessions.",
+    );
   });
 
   test("returns message when parent session has no messages", async () => {
@@ -60,7 +62,7 @@ describe("parent_session_messages", () => {
       makeContext() as any,
     );
 
-    expect(result).toContain("no messages");
+    expect(result).toEqual("The parent session has no messages.");
   });
 
   test("formats a full session with user messages, assistant messages, and tool parts", async () => {
@@ -165,47 +167,25 @@ describe("parent_session_messages", () => {
       makeContext() as any,
     );
 
-    // User message: shows role and content, no agent attribution
-    expect(result).toContain("1. user");
-    expect(result).toContain("Fix the login bug");
+    const expected = [
+      "1. user",
+      "Fix the login bug",
+      "",
+      "---",
+      "",
+      "2. assistant (tdd) [anthropic/claude-opus-4-6]",
+      "Let me check the auth flow.",
+      "  [tool] Read file: src/auth/login.ts → completed",
+      '    input: {"filePath":"src/auth/login.ts"}',
+      "  [tool] bun test login.test.ts → error: Process exited with code 1",
+      '    input: {"command":"bun test login.test.ts"}',
+      "  [tool] Fetch parent session messages → completed",
+      "  [tool] Ask user a question → completed",
+      '    input: {"question":"Which approach do you prefer?","options":["Option A","Option B"]}',
+      "The test is failing because of a missing import.",
+    ].join("\n");
 
-    // Assistant message: shows role, agent, model
-    expect(result).toContain("2. assistant (tdd) [anthropic/claude-opus-4-6]");
-    expect(result).toContain("Let me check the auth flow.");
-
-    // Tool parts: one-line summaries using state.title
-    expect(result).toContain("[tool] Read file: src/auth/login.ts → completed");
-    expect(result).toContain(
-      "[tool] bun test login.test.ts → error: Process exited with code 1",
-    );
-
-    // Tool input is included beneath the summary
-    expect(result).toContain('input: {"filePath":"src/auth/login.ts"}');
-    expect(result).toContain('input: {"command":"bun test login.test.ts"}');
-
-    // Internal tools: arguments are visible when present
-    expect(result).toContain("[tool] Ask user a question → completed");
-    expect(result).toContain(
-      'input: {"question":"Which approach do you prefer?","options":["Option A","Option B"]}',
-    );
-
-    // Internal tools with no arguments omit the input line
-    expect(result).toContain(
-      "[tool] Fetch parent session messages → completed",
-    );
-    const fetchLine = result.indexOf(
-      "[tool] Fetch parent session messages → completed",
-    );
-    const afterFetch = result.slice(
-      fetchLine + "[tool] Fetch parent session messages → completed".length,
-    );
-    expect(afterFetch.startsWith("\n    input:")).toBe(false);
-
-    // Messages are separated
-    expect(result).toContain("---");
-
-    // Full tool output is NOT included
-    expect(result).not.toContain("file contents...");
+    expect(result).toEqual(expected);
   });
 
   test("includes model variant in assistant message header when present", async () => {
@@ -244,9 +224,12 @@ describe("parent_session_messages", () => {
       makeContext() as any,
     );
 
-    expect(result).toContain(
+    const expected = [
       "1. assistant (build) [anthropic/claude-opus-4 (high)]",
-    );
+      "On it.",
+    ].join("\n");
+
+    expect(result).toEqual(expected);
   });
 
   test("omits input line when input is empty, null, or undefined", async () => {
@@ -306,10 +289,13 @@ describe("parent_session_messages", () => {
       makeContext() as any,
     );
 
-    // All three should render as simple one-liners without an input line
-    expect(result).toContain("[tool] Tool with empty input → completed");
-    expect(result).toContain("[tool] Tool with null input → completed");
-    expect(result).toContain("[tool] Tool with no input → completed");
-    expect(result).not.toContain("input:");
+    const expected = [
+      "1. assistant (build) [anthropic/claude-opus-4-6]",
+      "  [tool] Tool with empty input → completed",
+      "  [tool] Tool with null input → completed",
+      "  [tool] Tool with no input → completed",
+    ].join("\n");
+
+    expect(result).toEqual(expected);
   });
 });
