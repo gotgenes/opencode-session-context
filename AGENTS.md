@@ -33,7 +33,7 @@ bun run build        # Bundle + emit declarations
 All source lives in `src/`. The codebase is small — a single feature module:
 
 - `index.ts` — Public API re-export
-- `parent-session.ts` — Plugin implementation: registers `parent_session_messages` tool, fetches and formats parent session messages
+- `parent-session.ts` — Plugin implementation: registers `parent_session_messages` tool, fetches and formats parent session messages with tool input arguments
 - `types.ts` — Type augmentations for SDK v1 gaps (`agent` on AssistantMessage, `variant` on both message types, tracked at [opencode#15916](https://github.com/anomalyco/opencode/issues/15916))
 - `parent-session.test.ts` — Unit tests using manual mocks of the SDK client
 
@@ -50,7 +50,7 @@ The plugin exports an async factory (`ParentSessionPlugin`) that receives `{ cli
 
 ### Testing approach
 
-Tests mock the SDK client by constructing plain objects matching the client interface shape. No mocking libraries are used. Test helpers (`makeClient`, `makeContext`) live in the test file alongside the tests.
+Tests mock the SDK client by constructing plain objects matching the client interface shape. No mocking libraries are used. Test helpers (`makeClient`, `makeContext`) live in the test file alongside the tests. Assertions use `toEqual` on the complete output string rather than partial `toContain` checks.
 
 ### Code style
 
