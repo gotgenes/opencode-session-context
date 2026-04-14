@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/gotgenes/opencode-session-context/compare/v1.1.0...v1.2.0) (2026-04-14)
+
+
+### Features
+
+* include tool input arguments in formatted output ([3f52776](https://github.com/gotgenes/opencode-session-context/commit/3f52776dd8f5db7facf3b9f1e23e2034001d7533))
+
+
+### Documentation
+
+* update AGENTS.md with tool input formatting and toEqual convention ([b79f2d8](https://github.com/gotgenes/opencode-session-context/commit/b79f2d8b12b904abc34c21bc01b3cfe62bb88268))
+
 ## [1.1.0](https://github.com/gotgenes/opencode-session-context/compare/v1.0.0...v1.1.0) (2026-04-11)
 
 
