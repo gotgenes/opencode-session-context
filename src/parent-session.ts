@@ -3,14 +3,27 @@ import { tool } from "@opencode-ai/plugin";
 import type { Part } from "@opencode-ai/sdk";
 import type { AssistantMessageInfo, MessageWithParts } from "./types";
 
+function formatInput(input: unknown): string {
+  if (
+    input == null ||
+    (typeof input === "object" &&
+      !Array.isArray(input) &&
+      Object.keys(input as Record<string, unknown>).length === 0)
+  ) {
+    return "";
+  }
+  return `\n    input: ${JSON.stringify(input)}`;
+}
+
 function formatTool(part: Part & { type: "tool" }): string {
   const state = part.state as Record<string, unknown>;
   const status = state.status as string;
   const title = (state.title as string | undefined) ?? part.tool;
+  const input = formatInput(state.input);
   if (status === "error") {
-    return `  [tool] ${title} → error: ${state.error}`;
+    return `  [tool] ${title} → error: ${state.error}${input}`;
   }
-  return `  [tool] ${title} → ${status}`;
+  return `  [tool] ${title} → ${status}${input}`;
 }
 
 function formatParts(parts: Part[]): string {

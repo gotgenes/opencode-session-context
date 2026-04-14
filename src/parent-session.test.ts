@@ -105,7 +105,7 @@ describe("parent_session_messages", () => {
                     state: {
                       status: "completed",
                       title: "Read file: src/auth/login.ts",
-                      input: {},
+                      input: { filePath: "src/auth/login.ts" },
                       output: "file contents...",
                       metadata: {},
                       time: { start: 1, end: 2 },
@@ -117,7 +117,7 @@ describe("parent_session_messages", () => {
                     state: {
                       status: "error",
                       title: "bun test login.test.ts",
-                      input: {},
+                      input: { command: "bun test login.test.ts" },
                       error: "Process exited with code 1",
                       metadata: {},
                       time: { start: 3, end: 4 },
@@ -153,6 +153,10 @@ describe("parent_session_messages", () => {
     expect(result).toContain(
       "[tool] bun test login.test.ts → error: Process exited with code 1",
     );
+
+    // Tool input is included beneath the summary
+    expect(result).toContain('input: {"filePath":"src/auth/login.ts"}');
+    expect(result).toContain('input: {"command":"bun test login.test.ts"}');
 
     // Text after tool parts is included
     expect(result).toContain(
@@ -205,5 +209,69 @@ describe("parent_session_messages", () => {
     expect(result).toContain(
       "1. assistant (build) [anthropic/claude-opus-4 (high)]",
     );
+  });
+
+  test("omits input line when input is empty, null, or undefined", async () => {
+    const client = makeClient({
+      session: {
+        get: () =>
+          Promise.resolve({
+            data: { id: "child-session-1", parentID: "parent-session-1" },
+          }),
+        messages: () =>
+          Promise.resolve({
+            data: [
+              {
+                info: {
+                  role: "assistant",
+                  agent: "build",
+                  providerID: "anthropic",
+                  modelID: "claude-opus-4-6",
+                },
+                parts: [
+                  {
+                    type: "tool",
+                    tool: "empty-input",
+                    state: {
+                      status: "completed",
+                      title: "Tool with empty input",
+                      input: {},
+                    },
+                  },
+                  {
+                    type: "tool",
+                    tool: "null-input",
+                    state: {
+                      status: "completed",
+                      title: "Tool with null input",
+                      input: null,
+                    },
+                  },
+                  {
+                    type: "tool",
+                    tool: "missing-input",
+                    state: {
+                      status: "completed",
+                      title: "Tool with no input",
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+      },
+    });
+
+    const hooks = await ParentSessionPlugin({ client } as any);
+    const result = await hooks.tool!.parent_session_messages.execute(
+      {},
+      makeContext() as any,
+    );
+
+    // All three should render as simple one-liners without an input line
+    expect(result).toContain("[tool] Tool with empty input → completed");
+    expect(result).toContain("[tool] Tool with null input → completed");
+    expect(result).toContain("[tool] Tool with no input → completed");
+    expect(result).not.toContain("input:");
   });
 });
