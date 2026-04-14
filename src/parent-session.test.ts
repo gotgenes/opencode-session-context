@@ -135,6 +135,20 @@ describe("parent_session_messages", () => {
                     },
                   },
                   {
+                    type: "tool",
+                    tool: "question",
+                    state: {
+                      status: "completed",
+                      title: "Ask user a question",
+                      input: {
+                        question: "Which approach do you prefer?",
+                        options: ["Option A", "Option B"],
+                      },
+                      metadata: {},
+                      time: { start: 7, end: 8 },
+                    },
+                  },
+                  {
                     type: "text",
                     text: "The test is failing because of a missing import.",
                   },
@@ -169,12 +183,16 @@ describe("parent_session_messages", () => {
     expect(result).toContain('input: {"filePath":"src/auth/login.ts"}');
     expect(result).toContain('input: {"command":"bun test login.test.ts"}');
 
+    // Internal tools: arguments are visible when present
+    expect(result).toContain("[tool] Ask user a question → completed");
+    expect(result).toContain(
+      'input: {"question":"Which approach do you prefer?","options":["Option A","Option B"]}',
+    );
+
     // Internal tools with no arguments omit the input line
     expect(result).toContain(
       "[tool] Fetch parent session messages → completed",
     );
-    // Verify this tool's empty input doesn't produce an input line —
-    // match the tool line followed immediately by the next text part
     const fetchLine = result.indexOf(
       "[tool] Fetch parent session messages → completed",
     );
