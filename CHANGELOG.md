@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/gotgenes/opencode-session-context/compare/v1.2.0...v1.3.0) (2026-04-20)
+
+
+### Features
+
+* add session_messages tool for cross-session review ([a7ff6e1](https://github.com/gotgenes/opencode-session-context/commit/a7ff6e12cdd2b07b88878fc49e3592c6ee26a9e2))
+
 ## [1.2.0](https://github.com/gotgenes/opencode-session-context/compare/v1.1.0...v1.2.0) (2026-04-14)
 
 
