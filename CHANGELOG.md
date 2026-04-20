@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/gotgenes/opencode-session-context/compare/v1.3.0...v1.3.1) (2026-04-20)
+
+
+### Miscellaneous Chores
+
+* update release workflow and dependencies ([2d824c5](https://github.com/gotgenes/opencode-session-context/commit/2d824c50862f08bb95fae054c0e80eb60c924994))
+
 ## [1.3.0](https://github.com/gotgenes/opencode-session-context/compare/v1.2.0...v1.3.0) (2026-04-20)
 
 
