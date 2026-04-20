@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/gotgenes/opencode-session-context/compare/v1.3.1...v1.3.2) (2026-04-20)
+
+
+### Miscellaneous Chores
+
+* update GitHub Actions for Node 24 ([7deb94e](https://github.com/gotgenes/opencode-session-context/commit/7deb94e991def50e5f82edd439ac184ea035d055))
+
 ## [1.3.1](https://github.com/gotgenes/opencode-session-context/compare/v1.3.0...v1.3.1) (2026-04-20)
 
 
