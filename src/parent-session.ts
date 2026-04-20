@@ -55,6 +55,21 @@ function formatMessage(msg: MessageWithParts, index: number): string {
 }
 
 export const ParentSessionPlugin: Plugin = async ({ client }) => {
+  async function formatSessionMessages(
+    sessionID: string,
+    emptyMessage: string,
+  ): Promise<string> {
+    const response = await client.session.messages({
+      path: { id: sessionID },
+    });
+    const messages = (response.data ?? []) as MessageWithParts[];
+    if (messages.length === 0) {
+      return emptyMessage;
+    }
+
+    return messages.map(formatMessage).join("\n\n---\n\n");
+  }
+
   return {
     tool: {
       parent_session_messages: tool({
@@ -72,18 +87,28 @@ export const ParentSessionPlugin: Plugin = async ({ client }) => {
             | string
             | undefined;
           if (!parent) {
-            return "Error: This session has no parent. This tool only works from subagent sessions.";
+            return `Error: Session ${context.sessionID} has no parent. This tool only works from subagent sessions.`;
           }
 
-          const response = await client.session.messages({
-            path: { id: parent },
-          });
-          const messages = (response.data ?? []) as MessageWithParts[];
-          if (messages.length === 0) {
-            return "The parent session has no messages.";
-          }
-
-          return messages.map(formatMessage).join("\n\n---\n\n");
+          return formatSessionMessages(
+            parent,
+            `Session ${parent} has no messages.`,
+          );
+        },
+      }),
+      session_messages: tool({
+        description:
+          "Fetch all messages from a session by ID. " +
+          "Returns the full conversation with agent attribution " +
+          "and message content.",
+        args: {
+          sessionId: tool.schema.string().describe("The session ID to read"),
+        },
+        async execute(args) {
+          return formatSessionMessages(
+            args.sessionId,
+            `Session ${args.sessionId} has no messages.`,
+          );
         },
       }),
     },

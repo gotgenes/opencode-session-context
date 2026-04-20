@@ -2,52 +2,26 @@ import { describe, expect, test } from "bun:test";
 import { ParentSessionPlugin } from "./parent-session";
 import { makeClient, makeContext } from "./test-helpers";
 
-describe("parent_session_messages", () => {
-  test("returns error when session has no parent", async () => {
+describe("session_messages", () => {
+  test("returns message when requested session has no messages", async () => {
     const client = makeClient({
       session: {
-        get: () => Promise.resolve({ data: { id: "child-session-1" } }),
-      },
-    });
-
-    const hooks = await ParentSessionPlugin({ client } as any);
-    const result = await hooks.tool!.parent_session_messages.execute(
-      {},
-      makeContext() as any,
-    );
-
-    expect(result).toEqual(
-      "Error: Session child-session-1 has no parent. This tool only works from subagent sessions.",
-    );
-  });
-
-  test("returns message when parent session has no messages", async () => {
-    const client = makeClient({
-      session: {
-        get: () =>
-          Promise.resolve({
-            data: { id: "child-session-1", parentID: "parent-session-1" },
-          }),
         messages: () => Promise.resolve({ data: [] }),
       },
     });
 
     const hooks = await ParentSessionPlugin({ client } as any);
-    const result = await hooks.tool!.parent_session_messages.execute(
-      {},
+    const result = await hooks.tool!.session_messages.execute(
+      { sessionId: "phase-session-1" },
       makeContext() as any,
     );
 
-    expect(result).toEqual("Session parent-session-1 has no messages.");
+    expect(result).toEqual("Session phase-session-1 has no messages.");
   });
 
   test("formats a full session with user messages, assistant messages, and tool parts", async () => {
     const client = makeClient({
       session: {
-        get: () =>
-          Promise.resolve({
-            data: { id: "child-session-1", parentID: "parent-session-1" },
-          }),
         messages: () =>
           Promise.resolve({
             data: [
@@ -61,74 +35,48 @@ describe("parent_session_messages", () => {
                 parts: [
                   {
                     type: "text",
-                    text: "Fix the login bug",
+                    text: "Run the red phase tests.",
                   },
                 ],
               },
               {
                 info: {
                   role: "assistant",
-                  agent: "tdd",
+                  agent: "tdd-red",
                   providerID: "anthropic",
                   modelID: "claude-opus-4-6",
                 },
                 parts: [
                   {
                     type: "text",
-                    text: "Let me check the auth flow.",
+                    text: "I will run the targeted suite first.",
                   },
                   {
                     type: "tool",
-                    tool: "read",
+                    tool: "bash",
                     state: {
                       status: "completed",
-                      title: "Read file: src/auth/login.ts",
-                      input: { filePath: "src/auth/login.ts" },
-                      output: "file contents...",
+                      title: "bun test auth.red.test.ts",
+                      input: { command: "bun test auth.red.test.ts" },
                       metadata: {},
                       time: { start: 1, end: 2 },
                     },
                   },
                   {
                     type: "tool",
-                    tool: "bash",
+                    tool: "write",
                     state: {
                       status: "error",
-                      title: "bun test login.test.ts",
-                      input: { command: "bun test login.test.ts" },
-                      error: "Process exited with code 1",
+                      title: "Write failing test",
+                      input: { filePath: "src/auth/auth.red.test.ts" },
+                      error: "Permission denied",
                       metadata: {},
                       time: { start: 3, end: 4 },
                     },
                   },
                   {
-                    type: "tool",
-                    tool: "parent_session_messages",
-                    state: {
-                      status: "completed",
-                      title: "Fetch parent session messages",
-                      input: {},
-                      metadata: {},
-                      time: { start: 5, end: 6 },
-                    },
-                  },
-                  {
-                    type: "tool",
-                    tool: "question",
-                    state: {
-                      status: "completed",
-                      title: "Ask user a question",
-                      input: {
-                        question: "Which approach do you prefer?",
-                        options: ["Option A", "Option B"],
-                      },
-                      metadata: {},
-                      time: { start: 7, end: 8 },
-                    },
-                  },
-                  {
                     type: "text",
-                    text: "The test is failing because of a missing import.",
+                    text: "The test fails as expected.",
                   },
                 ],
               },
@@ -138,27 +86,24 @@ describe("parent_session_messages", () => {
     });
 
     const hooks = await ParentSessionPlugin({ client } as any);
-    const result = await hooks.tool!.parent_session_messages.execute(
-      {},
+    const result = await hooks.tool!.session_messages.execute(
+      { sessionId: "phase-session-2" },
       makeContext() as any,
     );
 
     const expected = [
       "1. user",
-      "Fix the login bug",
+      "Run the red phase tests.",
       "",
       "---",
       "",
-      "2. assistant (tdd) [anthropic/claude-opus-4-6]",
-      "Let me check the auth flow.",
-      "  [tool] Read file: src/auth/login.ts → completed",
-      '    input: {"filePath":"src/auth/login.ts"}',
-      "  [tool] bun test login.test.ts → error: Process exited with code 1",
-      '    input: {"command":"bun test login.test.ts"}',
-      "  [tool] Fetch parent session messages → completed",
-      "  [tool] Ask user a question → completed",
-      '    input: {"question":"Which approach do you prefer?","options":["Option A","Option B"]}',
-      "The test is failing because of a missing import.",
+      "2. assistant (tdd-red) [anthropic/claude-opus-4-6]",
+      "I will run the targeted suite first.",
+      "  [tool] bun test auth.red.test.ts → completed",
+      '    input: {"command":"bun test auth.red.test.ts"}',
+      "  [tool] Write failing test → error: Permission denied",
+      '    input: {"filePath":"src/auth/auth.red.test.ts"}',
+      "The test fails as expected.",
     ].join("\n");
 
     expect(result).toEqual(expected);
@@ -167,17 +112,13 @@ describe("parent_session_messages", () => {
   test("includes model variant in assistant message header when present", async () => {
     const client = makeClient({
       session: {
-        get: () =>
-          Promise.resolve({
-            data: { id: "child-session-1", parentID: "parent-session-1" },
-          }),
         messages: () =>
           Promise.resolve({
             data: [
               {
                 info: {
                   role: "assistant",
-                  agent: "build",
+                  agent: "tdd-refactor",
                   providerID: "anthropic",
                   modelID: "claude-opus-4",
                   variant: "high",
@@ -185,7 +126,7 @@ describe("parent_session_messages", () => {
                 parts: [
                   {
                     type: "text",
-                    text: "On it.",
+                    text: "Refactor complete.",
                   },
                 ],
               },
@@ -195,14 +136,14 @@ describe("parent_session_messages", () => {
     });
 
     const hooks = await ParentSessionPlugin({ client } as any);
-    const result = await hooks.tool!.parent_session_messages.execute(
-      {},
+    const result = await hooks.tool!.session_messages.execute(
+      { sessionId: "phase-session-3" },
       makeContext() as any,
     );
 
     const expected = [
-      "1. assistant (build) [anthropic/claude-opus-4 (high)]",
-      "On it.",
+      "1. assistant (tdd-refactor) [anthropic/claude-opus-4 (high)]",
+      "Refactor complete.",
     ].join("\n");
 
     expect(result).toEqual(expected);
@@ -211,10 +152,6 @@ describe("parent_session_messages", () => {
   test("omits input line when input is empty, null, or undefined", async () => {
     const client = makeClient({
       session: {
-        get: () =>
-          Promise.resolve({
-            data: { id: "child-session-1", parentID: "parent-session-1" },
-          }),
         messages: () =>
           Promise.resolve({
             data: [
@@ -260,8 +197,8 @@ describe("parent_session_messages", () => {
     });
 
     const hooks = await ParentSessionPlugin({ client } as any);
-    const result = await hooks.tool!.parent_session_messages.execute(
-      {},
+    const result = await hooks.tool!.session_messages.execute(
+      { sessionId: "phase-session-4" },
       makeContext() as any,
     );
 
