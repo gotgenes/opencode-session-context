@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/gotgenes/opencode-session-context/compare/v1.3.2...v1.4.0) (2026-04-24)
+
+
+### Features
+
+* add session_messages_batch tool for batch session reading ([ff8cc6f](https://github.com/gotgenes/opencode-session-context/commit/ff8cc6fb11a48ffafcbedea158d30cdce9ecfd35))
+
 ## [1.3.2](https://github.com/gotgenes/opencode-session-context/compare/v1.3.1...v1.3.2) (2026-04-20)
 
 
