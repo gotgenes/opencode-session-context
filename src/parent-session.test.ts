@@ -318,9 +318,12 @@ describe("session_messages_batch", () => {
     });
 
     const hooks = await ParentSessionPlugin({ client } as any);
-    const result = await hooks.tool!.session_messages_batch.execute({
-      sessionIds: ["session-1", "session-2"],
-    });
+    const result = await hooks.tool!.session_messages_batch.execute(
+      {
+        sessionIds: ["session-1", "session-2"],
+      },
+      makeContext() as any,
+    );
 
     const expected = [
       "=== Session: session-1 ===",
@@ -360,9 +363,12 @@ describe("session_messages_batch", () => {
     });
 
     const hooks = await ParentSessionPlugin({ client } as any);
-    const result = await hooks.tool!.session_messages_batch.execute({
-      sessionIds: ["session-1", "missing-session"],
-    });
+    const result = await hooks.tool!.session_messages_batch.execute(
+      {
+        sessionIds: ["session-1", "missing-session"],
+      },
+      makeContext() as any,
+    );
 
     const expected = [
       "=== Session: session-1 ===",
@@ -380,9 +386,12 @@ describe("session_messages_batch", () => {
     const client = makeClient();
 
     const hooks = await ParentSessionPlugin({ client } as any);
-    const result = await hooks.tool!.session_messages_batch.execute({
-      sessionIds: [],
-    });
+    const result = await hooks.tool!.session_messages_batch.execute(
+      {
+        sessionIds: [],
+      },
+      makeContext() as any,
+    );
 
     expect(result).toEqual("");
   });
@@ -413,9 +422,12 @@ describe("session_messages_batch", () => {
     });
 
     const hooks = await ParentSessionPlugin({ client } as any);
-    const result = await hooks.tool!.session_messages_batch.execute({
-      sessionIds: ["session-1"],
-    });
+    const result = await hooks.tool!.session_messages_batch.execute(
+      {
+        sessionIds: ["session-1"],
+      },
+      makeContext() as any,
+    );
 
     const expected = [
       "=== Session: session-1 ===",
