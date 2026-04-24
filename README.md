@@ -1,5 +1,12 @@
 # @gotgenes/opencode-session-context
 
+[![npm version](https://img.shields.io/npm/v/@gotgenes/opencode-session-context?style=flat&logo=npm&logoColor=white)](https://www.npmjs.com/package/@gotgenes/opencode-session-context)
+[![CI](https://img.shields.io/github/actions/workflow/status/gotgenes/opencode-session-context/ci.yml?style=flat&logo=github&label=CI)](https://github.com/gotgenes/opencode-session-context/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-%3E%3D1.0-f9f1e1?style=flat&logo=bun&logoColor=black)](https://bun.sh/)
+[![OpenCode Plugin](https://img.shields.io/badge/OpenCode-Plugin-8B5CF6?style=flat)](https://opencode.ai/)
+
 OpenCode plugin for cross-session context access in subagent workflows.
 
 ## What it does
@@ -27,10 +34,10 @@ Add the plugin to your `opencode.json`:
 
 The plugin registers these tools:
 
-| Tool | Description |
-| --- | --- |
-| `parent_session_messages` | Reads the current session's `parentID` via the SDK and fetches all messages from the parent session. |
-| `session_messages(sessionId)` | Fetches all messages from any session by ID. |
+| Tool                                 | Description                                                                                                      |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `parent_session_messages`            | Reads the current session's `parentID` via the SDK and fetches all messages from the parent session.             |
+| `session_messages(sessionId)`        | Fetches all messages from any session by ID.                                                                     |
 | `session_messages_batch(sessionIds)` | Fetches all messages from multiple sessions by ID and concatenates them with `=== Session: <id> ===` delimiters. |
 
 Both return structured text with agent attribution, full message text, and
