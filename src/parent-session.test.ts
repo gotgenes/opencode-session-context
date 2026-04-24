@@ -275,3 +275,154 @@ describe("parent_session_messages", () => {
     expect(result).toEqual(expected);
   });
 });
+
+describe("session_messages_batch", () => {
+  test("returns multiple valid sessions with delimiters", async () => {
+    const client = makeClient({
+      session: {
+        messages: ({ path }: any) => {
+          if (path.id === "session-1") {
+            return Promise.resolve({
+              data: [
+                {
+                  info: {
+                    role: "user",
+                    providerID: "anthropic",
+                    modelID: "claude-opus-4-6",
+                  },
+                  parts: [{ type: "text", text: "First session" }],
+                },
+              ],
+            });
+          }
+
+          if (path.id === "session-2") {
+            return Promise.resolve({
+              data: [
+                {
+                  info: {
+                    role: "assistant",
+                    agent: "review",
+                    providerID: "anthropic",
+                    modelID: "claude-opus-4-6",
+                  },
+                  parts: [{ type: "text", text: "Second session" }],
+                },
+              ],
+            });
+          }
+
+          return Promise.resolve({ data: [] });
+        },
+      },
+    });
+
+    const hooks = await ParentSessionPlugin({ client } as any);
+    const result = await hooks.tool!.session_messages_batch.execute({
+      sessionIds: ["session-1", "session-2"],
+    });
+
+    const expected = [
+      "=== Session: session-1 ===",
+      "1. user",
+      "First session",
+      "",
+      "=== Session: session-2 ===",
+      "1. assistant (review) [anthropic/claude-opus-4-6]",
+      "Second session",
+    ].join("\n");
+
+    expect(result).toEqual(expected);
+  });
+
+  test("includes note when one session has no messages", async () => {
+    const client = makeClient({
+      session: {
+        messages: ({ path }: any) => {
+          if (path.id === "session-1") {
+            return Promise.resolve({
+              data: [
+                {
+                  info: {
+                    role: "user",
+                    providerID: "anthropic",
+                    modelID: "claude-opus-4-6",
+                  },
+                  parts: [{ type: "text", text: "Has messages" }],
+                },
+              ],
+            });
+          }
+
+          return Promise.resolve({ data: [] });
+        },
+      },
+    });
+
+    const hooks = await ParentSessionPlugin({ client } as any);
+    const result = await hooks.tool!.session_messages_batch.execute({
+      sessionIds: ["session-1", "missing-session"],
+    });
+
+    const expected = [
+      "=== Session: session-1 ===",
+      "1. user",
+      "Has messages",
+      "",
+      "=== Session: missing-session ===",
+      "(No messages found or session not accessible)",
+    ].join("\n");
+
+    expect(result).toEqual(expected);
+  });
+
+  test("returns empty string for empty array input", async () => {
+    const client = makeClient();
+
+    const hooks = await ParentSessionPlugin({ client } as any);
+    const result = await hooks.tool!.session_messages_batch.execute({
+      sessionIds: [],
+    });
+
+    expect(result).toEqual("");
+  });
+
+  test("returns a single session with delimiter header", async () => {
+    const client = makeClient({
+      session: {
+        messages: ({ path }: any) => {
+          if (path.id === "session-1") {
+            return Promise.resolve({
+              data: [
+                {
+                  info: {
+                    role: "assistant",
+                    agent: "tdd",
+                    providerID: "anthropic",
+                    modelID: "claude-opus-4-6",
+                  },
+                  parts: [{ type: "text", text: "Single session" }],
+                },
+              ],
+            });
+          }
+
+          return Promise.resolve({ data: [] });
+        },
+      },
+    });
+
+    const hooks = await ParentSessionPlugin({ client } as any);
+    const result = await hooks.tool!.session_messages_batch.execute({
+      sessionIds: ["session-1"],
+    });
+
+    const expected = [
+      "=== Session: session-1 ===",
+      "1. assistant (tdd) [anthropic/claude-opus-4-6]",
+      "Single session",
+    ].join("\n");
+
+    expect(result).toEqual(expected);
+  });
+});

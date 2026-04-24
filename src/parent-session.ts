@@ -70,6 +70,25 @@ export const ParentSessionPlugin: Plugin = async ({ client }) => {
     return messages.map(formatMessage).join("\n\n---\n\n");
   }
 
+  async function formatSessionMessagesBatch(
+    sessionIDs: string[],
+  ): Promise<string> {
+    const sections = await Promise.all(
+      sessionIDs.map(async (sessionID) => {
+        const emptyMessage = "(No messages found or session not accessible)";
+
+        try {
+          const output = await formatSessionMessages(sessionID, emptyMessage);
+          return `=== Session: ${sessionID} ===\n${output}`;
+        } catch {
+          return `=== Session: ${sessionID} ===\n${emptyMessage}`;
+        }
+      }),
+    );
+
+    return sections.join("\n\n");
+  }
+
   return {
     tool: {
       parent_session_messages: tool({
@@ -109,6 +128,18 @@ export const ParentSessionPlugin: Plugin = async ({ client }) => {
             args.sessionId,
             `Session ${args.sessionId} has no messages.`,
           );
+        },
+      }),
+      session_messages_batch: tool({
+        description:
+          "Fetch all messages from multiple sessions by ID. Returns the full conversations concatenated with session delimiters. Useful for reading multiple related sessions (e.g., TDD phase sessions from a dispatch log) in a single tool call.",
+        args: {
+          sessionIds: tool.schema
+            .array(tool.schema.string())
+            .describe("Array of session IDs to fetch messages from."),
+        },
+        async execute(args) {
+          return formatSessionMessagesBatch(args.sessionIds);
         },
       }),
     },

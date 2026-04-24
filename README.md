@@ -4,8 +4,9 @@ OpenCode plugin for cross-session context access in subagent workflows.
 
 ## What it does
 
-This package provides a plugin that exposes `parent_session_messages` and
-`session_messages` tools for reading conversation history across sessions.
+This package provides a plugin that exposes `parent_session_messages`,
+`session_messages`, and `session_messages_batch` tools for reading conversation
+history across sessions.
 
 When OpenCode dispatches a subagent via the Task tool, the subagent runs in a
 fresh child session with no access to the parent's conversation history.
@@ -24,13 +25,13 @@ Add the plugin to your `opencode.json`:
 
 ## How it works
 
-The plugin registers two tools:
+The plugin registers these tools:
 
-1. `parent_session_messages`
-   - Reads the current session's `parentID` via the SDK
-   - Fetches all messages from the parent session
-2. `session_messages(sessionId)`
-   - Fetches all messages from any session by ID
+| Tool | Description |
+| --- | --- |
+| `parent_session_messages` | Reads the current session's `parentID` via the SDK and fetches all messages from the parent session. |
+| `session_messages(sessionId)` | Fetches all messages from any session by ID. |
+| `session_messages_batch(sessionIds)` | Fetches all messages from multiple sessions by ID and concatenates them with `=== Session: <id> ===` delimiters. |
 
 Both return structured text with agent attribution, full message text, and
 one-line summaries for tool invocations (using the title computed by OpenCode).
@@ -67,7 +68,7 @@ are session IDs. A reviewer agent can reconstruct full TDD phase ordering by:
 
 1. Calling `parent_session_messages` to read the orchestrator thread and
    extract `task_id` values
-2. Calling `session_messages(taskId)` for each `tdd-red`, `tdd-green`, and
-   `tdd-refactor` subagent session
+2. Calling `session_messages_batch([taskId, ...])` for the `tdd-red`,
+   `tdd-green`, and `tdd-refactor` subagent sessions
 3. Reviewing full per-phase detail, including file writes, test runs, and
    checkpoint calls

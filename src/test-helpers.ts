@@ -1,5 +1,7 @@
-type SessionGet = () => Promise<{ data: Record<string, unknown> }>;
-type SessionMessages = () => Promise<{ data: unknown[] }>;
+type SessionGet = (
+  _args?: unknown,
+) => Promise<{ data: Record<string, unknown> }>;
+type SessionMessages = (_args?: unknown) => Promise<{ data: unknown[] }>;
 
 export function makeClient(
   overrides: {
