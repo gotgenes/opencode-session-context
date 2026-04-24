@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/gotgenes/opencode-session-context/compare/v1.4.0...v1.4.1) (2026-04-24)
+
+
+### Documentation
+
+* add project badges ([903dc1a](https://github.com/gotgenes/opencode-session-context/commit/903dc1a7ffdaeee2470157b76627d844a4272d32))
+
 ## [1.4.0](https://github.com/gotgenes/opencode-session-context/compare/v1.3.2...v1.4.0) (2026-04-24)
 
 
